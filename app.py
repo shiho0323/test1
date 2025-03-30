@@ -2,8 +2,19 @@ import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
 import japanize_matplotlib
+import numpy as np
+import glob
+import os
 
-data = pd.read_csv("トレ全体4.csv")
+# ファイルパスの指定
+folder_path = "トレ記録/"
+csv_files = glob.glob(os.path.join(folder_path, "*.csv"))
+
+# 複数のCSVを読み込んで結合
+df_list = [pd.read_csv(f) for f in csv_files]
+data = pd.concat(df_list, ignore_index=True)
+
+#data = pd.read_csv("トレ全体4.csv")
 meibo = pd.read_csv("24trackman.csv")
 
 meibo = meibo.query("PitcherTeam == 'TOK'")
