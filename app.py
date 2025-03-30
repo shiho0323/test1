@@ -7,7 +7,7 @@ import glob
 import os
 
 # ファイルパスの指定
-folder_path = "トレ記録/"
+folder_path = "トレデータ/"
 csv_files = glob.glob(os.path.join(folder_path, "*.csv"))
 
 # 複数のCSVを読み込んで結合
