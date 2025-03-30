@@ -3,8 +3,8 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import japanize_matplotlib
 
-data = pd.read_csv("/Users/hiramatsushiho/Desktop/野球部作業場/トレ系/トレ全体4.csv")
-meibo = pd.read_csv("/Users/hiramatsushiho/Desktop/野球部作業場/名簿/24trackman.csv")
+data = pd.read_csv("トレ全体4.csv")
+meibo = pd.read_csv("24trackman.csv")
 
 meibo = meibo.query("PitcherTeam == 'TOK'")
 
