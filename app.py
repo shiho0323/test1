@@ -26,29 +26,29 @@ page = st.sidebar.radio("表示モードを選択", ("個人表示", "全体表�
 
 if page == "個人表示":
     st.header("個人別データ表示")
-    names = ["全員"] + list(meibo["フルネーム"].unique())
+    names = list(meibo["フルネーム"].unique())
     selected_name = st.sidebar.selectbox("名前を選択", options=names)
 
-    if selected_name != "全員":
-        filtered_data = data[data["名前"] == selected_name].copy()
-        filtered_data["日付"] = pd.to_datetime(filtered_data["日付"], errors="coerce")
-        filtered_data["体重"] = pd.to_numeric(filtered_data["体重"], errors="coerce")
-        filtered_data = filtered_data.dropna(subset=["日付", "体重"])
-        filtered_data = filtered_data.sort_values("日付")
+    #if selected_name != "全員":
+    filtered_data = data[data["名前"] == selected_name].copy()
+    filtered_data["日付"] = pd.to_datetime(filtered_data["日付"], errors="coerce")
+    filtered_data["体重"] = pd.to_numeric(filtered_data["体重"], errors="coerce")
+    filtered_data = filtered_data.dropna(subset=["日付", "体重"])
+    filtered_data = filtered_data.sort_values("日付")
 
-        date = filtered_data["日付"]
-        weight = filtered_data["体重"]
+    date = filtered_data["日付"]
+    weight = filtered_data["体重"]
 
-        fig, ax = plt.subplots()
-        ax.plot(date, weight, label=selected_name, marker="o", linestyle="-")
-        ax.legend(loc="upper left", bbox_to_anchor=(1.05, 1))
-        ax.set_xticklabels(date.dt.strftime("%Y-%m-%d"), rotation=45)
-        ax.set_xlabel("日付")
-        ax.set_ylabel("体重")
+    fig, ax = plt.subplots()
+    ax.plot(date, weight, label=selected_name, marker="o", linestyle="-")
+    ax.legend(loc="upper left", bbox_to_anchor=(1.05, 1))
+    ax.set_xticklabels(date.dt.strftime("%Y-%m-%d"), rotation=45)
+    ax.set_xlabel("日付")
+    ax.set_ylabel("体重")
 
-        st.pyplot(fig)
-    else:
-        filtered_data = data
+    st.pyplot(fig)
+    #else:
+        #filtered_data = data
 
     st.subheader(f"{selected_name}のデータ" if selected_name != "全員" else "全ユーザーのデータ")
     st.dataframe(filtered_data)
