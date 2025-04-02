@@ -13,7 +13,7 @@ csv_files = glob.glob(os.path.join(folder_path, "*.csv"))
 # 複数のCSVを読み込んで結合
 df_list = [pd.read_csv(f) for f in csv_files]
 data = pd.concat(df_list, ignore_index=True)
-data["日付"] = pd.to_datetime(data["日付"], format="%Y-%m-%d", errors="coerce")
+data["日付"] = pd.to_datetime(data["日付"], errors='coerce')
 
 #data = pd.read_csv("トレ全体4.csv")
 meibo = pd.read_csv("24trackman.csv")
