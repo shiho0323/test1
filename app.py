@@ -48,3 +48,16 @@ if page == "個人表示":
 
 elif page == "全体表示":
     st.header("平均データ表示")
+    df = data
+    df_mean = df.groupby("日付")["BMI"].mean().reset_index()
+    df_mean = df_mean.sort_values(by="日付")
+    plt.figure(figsize=(10, 6))
+
+    plt.plot(df_mean["日付"], df_mean["BMI"], marker="o", linestyle="-")
+
+    plt.xticks(rotation=45)
+    plt.xlabel("日付")
+    plt.ylabel("平均BMI")
+    plt.title("各日付の平均BMIの推移")
+    plt.tight_layout()
+    st.pyplot()
