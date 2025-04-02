@@ -20,7 +20,7 @@ meibo = pd.read_csv("24trackman.csv")
 
 meibo = meibo.query("PitcherTeam == 'TOK'")
 
-st.title("トレ＆体重データ")
+st.title("フィジカルデータ")
 
 page = st.sidebar.radio("表示モードを選択", ("個人表示", "全体表示"))
 
@@ -61,7 +61,7 @@ if page == "個人表示":
 
 elif page == "全体表示":
     st.header("平均データ表示")
-    df = data.copy()
+    df = data#.copy()
     df["日付"] = pd.to_datetime(df["日付"], errors="coerce")
     df["体重"] = pd.to_numeric(df["体重"], errors="coerce")
     df["除脂肪体重"] = pd.to_numeric(df["除脂肪体重"], errors="coerce")
@@ -70,9 +70,10 @@ elif page == "全体表示":
     df_mean = df_mean.sort_values(by="日付")
 
     fig, ax = plt.subplots(figsize=(10, 6))
-    ax.plot(df_mean["日付"], df_mean["体重"], marker="o", linestyle="-")
-    ax.plot(df_mean["日付"], df_mean["除脂肪体重"], marker="o", linestyle="-")
+    ax.plot(df_mean["日付"], df_mean["体重"], marker="o", linestyle="-", label="体重")
+    ax.plot(df_mean["日付"], df_mean["除脂肪体重"], marker="o", linestyle="-", label="除脂肪体重")
     #ax.set_xticklabels(df_mean["日付"].dt.strftime("%Y-%m-%d"), rotation=45)
+    ax.legend(loc="upper left", bbox_to_anchor=(1.05, 1))
     ax.set_xlabel("日付")
     ax.set_ylabel("kg")
     ax.set_title("平均値の推移")
