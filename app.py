@@ -33,6 +33,7 @@ if page == "個人表示":
     # フィルター処理
     if selected_name != "全員":
         filtered_data = data[data["名前"] == selected_name]
+        filtered_data = filtered_data.sort_values("日付")
         date = filtered_data["日付"].tolist()
         weight = filtered_data["体重"].tolist()
         plt.plot(date, weight, label=selected_name)
