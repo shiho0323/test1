@@ -45,28 +45,36 @@ if page == "個人表示":
     ax.legend(loc="upper left", bbox_to_anchor=(1.05, 1))
     ax.set_xticklabels(date.dt.strftime("%Y-%m-%d"), rotation=45)
     ax.set_xlabel("日付")
-    ax.set_ylabel("体重")
+    ax.set_ylabel("kg")
 
     st.pyplot(fig)
     #else:
         #filtered_data = data
 
     st.subheader(f"{selected_name}のデータ" if selected_name != "全員" else "全ユーザーのデータ")
-    st.dataframe(filtered_data)
+
+    columns = ["日付", "名前", "体重", "体脂肪率", "除脂肪体重", "スクワットMAX(kg)", "ベンチプレスMAX(kg)", 
+               "握力(左)", "握力(右)", "プルダウン", "Broad Jump(cm)", "Left Ice Skater Jump(cm)", 
+               "Right Ice Skater Jump(cm)", "メディシン(バックスロー3kg)", "プライオ(三段跳び)", "チンニング", "ガチスタ"]
+    looked_data = filtered_data[columns]
+    st.dataframe(looked_data)
 
 elif page == "全体表示":
     st.header("平均データ表示")
     df = data.copy()
     df["日付"] = pd.to_datetime(df["日付"], errors="coerce")
     df["体重"] = pd.to_numeric(df["体重"], errors="coerce")
-    df_mean = df.groupby("日付")["体重"].mean().reset_index()
+    df["除脂肪体重"] = pd.to_numeric(df["除脂肪体重"], errors="coerce")
+    df["除脂肪体重"] = df["除脂肪体重"].replace(0, np.nan)
+    df_mean = df.groupby("日付")[["体重", "除脂肪体重"]].mean().reset_index()
     df_mean = df_mean.sort_values(by="日付")
 
     fig, ax = plt.subplots(figsize=(10, 6))
-    ax.plot(df_mean["日付"], df_mean["体重"], df_mean["除脂肪体重"], marker="o", linestyle="-")
+    ax.plot(df_mean["日付"], df_mean["体重"], marker="o", linestyle="-")
+    ax.plot(df_mean["日付"], df_mean["除脂肪体重"], marker="o", linestyle="-")
     ax.set_xticklabels(df_mean["日付"].dt.strftime("%Y-%m-%d"), rotation=45)
     ax.set_xlabel("日付")
-    ax.set_ylabel("平均体重")
-    ax.set_title("各日付の平均体重の推移")
+    ax.set_ylabel("kg")
+    ax.set_title("平均値の推移")
 
     st.pyplot(fig)
