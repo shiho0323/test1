@@ -14,6 +14,7 @@ csv_files = glob.glob(os.path.join(folder_path, "*.csv"))
 df_list = [pd.read_csv(f) for f in csv_files]
 data = pd.concat(df_list, ignore_index=True)
 data["日付"] = pd.to_datetime(data["日付"], errors='coerce')
+data["除脂肪体重"] = data["除脂肪体重"].replace(0, np.nan)
 
 #data = pd.read_csv("トレ全体4.csv")
 meibo = pd.read_csv("24trackman.csv")
@@ -65,7 +66,6 @@ elif page == "全体表示":
     df["日付"] = pd.to_datetime(df["日付"], errors="coerce")
     df["体重"] = pd.to_numeric(df["体重"], errors="coerce")
     df["除脂肪体重"] = pd.to_numeric(df["除脂肪体重"], errors="coerce")
-    df["除脂肪体重"] = df["除脂肪体重"].replace(0, np.nan)
     df_mean = df.groupby("日付")[["体重", "除脂肪体重"]].mean().reset_index()
     df_mean = df_mean.sort_values(by="日付")
 
