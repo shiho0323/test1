@@ -14,6 +14,7 @@ csv_files = glob.glob(os.path.join(folder_path, "*.csv"))
 df_list = [pd.read_csv(f) for f in csv_files]
 data = pd.concat(df_list, ignore_index=True)
 data["日付"] = pd.to_datetime(data["日付"], errors='coerce')
+data["除脂肪体重"] = pd.to_numeric(data["除脂肪体重"], errors="coerce")
 data["除脂肪体重"] = data["除脂肪体重"].replace(0, np.nan)
 
 #data = pd.read_csv("トレ全体4.csv")
