@@ -26,40 +26,46 @@ page = st.sidebar.radio("表示モードを選択", ("個人表示", "全体表�
 
 if page == "個人表示":
     st.header("個人別データ表示")
-    # ユーザー名の選択
     names = ["全員"] + list(meibo["フルネーム"].unique())
     selected_name = st.sidebar.selectbox("名前を選択", options=names)
-    
-    # フィルター処理
+
     if selected_name != "全員":
-        filtered_data = data[data["名前"] == selected_name]
+        filtered_data = data[data["名前"] == selected_name].copy()
+        filtered_data["日付"] = pd.to_datetime(filtered_data["日付"], errors="coerce")
+        filtered_data["体重"] = pd.to_numeric(filtered_data["体重"], errors="coerce")
+        filtered_data = filtered_data.dropna(subset=["日付", "体重"])
         filtered_data = filtered_data.sort_values("日付")
-        date = filtered_data["日付"].tolist()
-        weight = filtered_data["体重"].tolist()
-        plt.plot(date, weight, label=selected_name)
-        plt.legend(loc="upper left", bbox_to_anchor=(1.05, 1))
-        plt.xticks(rotation=45)
-        plt.xlabel("日付")
-        plt.ylabel("体重")
-        st.pyplot()
+
+        date = filtered_data["日付"]
+        weight = filtered_data["体重"]
+
+        fig, ax = plt.subplots()
+        ax.plot(date, weight, label=selected_name)
+        ax.legend(loc="upper left", bbox_to_anchor=(1.05, 1))
+        ax.set_xticklabels(date.dt.strftime("%Y-%m-%d"), rotation=45)
+        ax.set_xlabel("日付")
+        ax.set_ylabel("体重")
+
+        st.pyplot(fig)
     else:
         filtered_data = data
-    
+
     st.subheader(f"{selected_name}のデータ" if selected_name != "全員" else "全ユーザーのデータ")
     st.dataframe(filtered_data)
 
 elif page == "全体表示":
     st.header("平均データ表示")
-    df = data
+    df = data.copy()
+    df["日付"] = pd.to_datetime(df["日付"], errors="coerce")
+    df["体重"] = pd.to_numeric(df["体重"], errors="coerce")
     df_mean = df.groupby("日付")["体重"].mean().reset_index()
     df_mean = df_mean.sort_values(by="日付")
-    plt.figure(figsize=(10, 6))
 
-    plt.plot(df_mean["日付"], df_mean["体重"], marker="o", linestyle="-")
+    fig, ax = plt.subplots(figsize=(10, 6))
+    ax.plot(df_mean["日付"], df_mean["体重"], marker="o", linestyle="-")
+    ax.set_xticklabels(df_mean["日付"].dt.strftime("%Y-%m-%d"), rotation=45)
+    ax.set_xlabel("日付")
+    ax.set_ylabel("平均体重")
+    ax.set_title("各日付の平均体重の推移")
 
-    plt.xticks(rotation=45)
-    plt.xlabel("日付")
-    plt.ylabel("平均体重")
-    plt.title("各日付の平均体重の推移")
-    plt.tight_layout()
-    st.pyplot()
+    st.pyplot(fig)
