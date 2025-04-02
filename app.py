@@ -40,7 +40,7 @@ if page == "個人表示":
         weight = filtered_data["体重"]
 
         fig, ax = plt.subplots()
-        ax.plot(date, weight, label=selected_name)
+        ax.plot(date, weight, label=selected_name, marker="o", linestyle="-")
         ax.legend(loc="upper left", bbox_to_anchor=(1.05, 1))
         ax.set_xticklabels(date.dt.strftime("%Y-%m-%d"), rotation=45)
         ax.set_xlabel("日付")
