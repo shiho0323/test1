@@ -43,7 +43,7 @@ if page == "個人表示":
     ax.plot(date, weight, label="体重", marker="o", linestyle="-")
     ax.plot(date, filtered_data["除脂肪体重"], label="除脂肪体重", marker="o", linestyle="-")
     ax.legend(loc="upper left", bbox_to_anchor=(1.05, 1))
-    ax.set_xticklabels(date.dt.strftime("%Y-%m-%d"), rotation=45)
+    #ax.set_xticklabels(date.dt.strftime("%Y-%m-%d"), rotation=45)
     ax.set_xlabel("日付")
     ax.set_ylabel("kg")
 
@@ -72,7 +72,7 @@ elif page == "全体表示":
     fig, ax = plt.subplots(figsize=(10, 6))
     ax.plot(df_mean["日付"], df_mean["体重"], marker="o", linestyle="-")
     ax.plot(df_mean["日付"], df_mean["除脂肪体重"], marker="o", linestyle="-")
-    ax.set_xticklabels(df_mean["日付"].dt.strftime("%Y-%m-%d"), rotation=45)
+    #ax.set_xticklabels(df_mean["日付"].dt.strftime("%Y-%m-%d"), rotation=45)
     ax.set_xlabel("日付")
     ax.set_ylabel("kg")
     ax.set_title("平均値の推移")
