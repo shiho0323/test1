@@ -12,21 +12,21 @@ csv_files = glob.glob(os.path.join(folder_path, "*.csv"))
 # 複数のcsvを結合
 df_list = [pd.read_csv(f) for f in csv_files]
 data = pd.concat(df_list, ignore_index=True)
-data["日付"] = pd.to_datetime(data["日付"], errors='coerce')
-data["除脂肪体重"] = pd.to_numeric(data["除脂肪体重"], errors="coerce")
-data["除脂肪体重"] = data["除脂肪体重"].replace(0, np.nan)
+data["日付"] = pd.to_datetime(data["\u65e5\u4ed8"], errors='coerce')
+data["\u9664\u8102\u80aa\u4f53\u91cd"] = pd.to_numeric(data["\u9664\u8102\u80aa\u4f53\u91cd"], errors="coerce")
+data["\u9664\u8102\u80aa\u4f53\u91cd"] = data["\u9664\u8102\u80aa\u4f53\u91cd"].replace(0, np.nan)
 
 meibo = pd.read_csv("/Users/hiramatsushiho/Desktop/野球部作業場/test1/24trackman.csv")
 meibo = meibo.query("PitcherTeam == 'TOK'")
 
 # 分類
-m1 = meibo.query("入学年 == 2021")
-senior = meibo.query("入学年 == 2022")
-junior = meibo.query("入学年 == 2023")
-sophomore = meibo.query("入学年 == 2024")
-freshman = meibo.query("入学年 == 2025")
-pitcher = meibo.query("位置 == '投手'")
-batter = meibo.query("位置 != '投手'")
+m1 = meibo.query("\u5165\u5b66\u5e74 == 2021")
+senior = meibo.query("\u5165\u5b66\u5e74 == 2022")
+junior = meibo.query("\u5165\u5b66\u5e74 == 2023")
+sophomore = meibo.query("\u5165\u5b66\u5e74 == 2024")
+freshman = meibo.query("\u5165\u5b66\u5e74 == 2025")
+pitcher = meibo.query("\u4f4d\u7f6e == '投手'")
+batter = meibo.query("\u4f4d\u7f6e != '投手'")
 
 st.title("フィジカルデータ")
 
