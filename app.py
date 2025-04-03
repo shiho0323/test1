@@ -6,7 +6,7 @@ import os
 import plotly.graph_objects as go
 
 # ファイルパスの指定
-folder_path = "トレデータ/"
+folder_path = "/Users/hiramatsushiho/Desktop/野球部作業場/test1/トレデータ/"
 csv_files = glob.glob(os.path.join(folder_path, "*.csv"))
 
 # 複数のcsvを結合
@@ -16,7 +16,7 @@ data["日付"] = pd.to_datetime(data["\u65e5\u4ed8"], errors='coerce')
 data["\u9664\u8102\u80aa\u4f53\u91cd"] = pd.to_numeric(data["\u9664\u8102\u80aa\u4f53\u91cd"], errors="coerce")
 data["\u9664\u8102\u80aa\u4f53\u91cd"] = data["\u9664\u8102\u80aa\u4f53\u91cd"].replace(0, np.nan)
 
-meibo = pd.read_csv("24trackman.csv")
+meibo = pd.read_csv("/Users/hiramatsushiho/Desktop/野球部作業場/test1/24trackman.csv")
 meibo = meibo.query("PitcherTeam == 'TOK'")
 
 # 分類
