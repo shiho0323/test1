@@ -1,43 +1,32 @@
 import streamlit as st
 import pandas as pd
-import matplotlib.pyplot as plt
-import japanize_matplotlib
 import numpy as np
 import glob
 import os
+import plotly.graph_objects as go
 
 # ファイルパスの指定
-folder_path = "トレデータ/"
+folder_path = "/Users/hiramatsushiho/Desktop/野球部作業場/test1/トレデータ/"
 csv_files = glob.glob(os.path.join(folder_path, "*.csv"))
 
-# 複数のCSVを読み込んで結合
+# 複数のcsvを結合
 df_list = [pd.read_csv(f) for f in csv_files]
 data = pd.concat(df_list, ignore_index=True)
-data["日付"] = pd.to_datetime(data["日付"], errors='coerce')
-data["除脂肪体重"] = pd.to_numeric(data["除脂肪体重"], errors="coerce")
-data["除脂肪体重"] = data["除脂肪体重"].replace(0, np.nan)
+data["日付"] = pd.to_datetime(data["\u65e5\u4ed8"], errors='coerce')
+data["\u9664\u8102\u80aa\u4f53\u91cd"] = pd.to_numeric(data["\u9664\u8102\u80aa\u4f53\u91cd"], errors="coerce")
+data["\u9664\u8102\u80aa\u4f53\u91cd"] = data["\u9664\u8102\u80aa\u4f53\u91cd"].replace(0, np.nan)
 
-#data = pd.read_csv("トレ全体4.csv")
-meibo = pd.read_csv("24trackman.csv")
+meibo = pd.read_csv("/Users/hiramatsushiho/Desktop/野球部作業場/test1/24trackman.csv")
 meibo = meibo.query("PitcherTeam == 'TOK'")
 
-m1 = meibo.query("入学年 == 2021")
-senior = meibo.query("入学年 == 2022")
-junior = meibo.query("入学年 == 2023")
-sophomore = meibo.query("入学年 == 2024")
-freshman = meibo.query("入学年 == 2025")
-pitcher = meibo.query("位置 == '投手'")
-batter = meibo.query("位置 != '投手'")
-m1p = m1.query("位置 == '投手'")
-m1b = m1.query("位置 != '投手'")
-seniorp = senior.query("位置 == '投手'")
-seniorb = senior.query("位置 != '投手'")
-juniorp = junior.query("位置 == '投手'")
-juniorb = junior.query("位置 != '投手'")
-sophop = sophomore.query("位置 == '投手'")
-sophob = sophomore.query("位置 != '投手'")
-freshmanp = freshman.query("位置 == '投手'")
-freshmanb = freshman.query("位置 != '投手'")
+# 分類
+m1 = meibo.query("\u5165\u5b66\u5e74 == 2021")
+senior = meibo.query("\u5165\u5b66\u5e74 == 2022")
+junior = meibo.query("\u5165\u5b66\u5e74 == 2023")
+sophomore = meibo.query("\u5165\u5b66\u5e74 == 2024")
+freshman = meibo.query("\u5165\u5b66\u5e74 == 2025")
+pitcher = meibo.query("\u4f4d\u7f6e == '投手'")
+batter = meibo.query("\u4f4d\u7f6e != '投手'")
 
 st.title("フィジカルデータ")
 
@@ -48,205 +37,64 @@ if page == "個人表示":
     names = list(meibo["フルネーム"].unique())
     selected_name = st.sidebar.selectbox("名前を選択", options=names)
 
-    #if selected_name != "全員":
     filtered_data = data[data["名前"] == selected_name].copy()
     filtered_data["日付"] = pd.to_datetime(filtered_data["日付"], errors="coerce")
     filtered_data["体重"] = pd.to_numeric(filtered_data["体重"], errors="coerce")
+    filtered_data["除脂肪体重"] = pd.to_numeric(filtered_data["除脂肪体重"], errors="coerce")
     filtered_data = filtered_data.dropna(subset=["日付", "体重"])
     filtered_data = filtered_data.sort_values("日付")
 
-    date = filtered_data["日付"]
-    weight = filtered_data["体重"]
+    fig = go.Figure()
+    fig.add_trace(go.Scatter(x=filtered_data["日付"], y=filtered_data["体重"], mode='lines+markers', name="体重"))
+    fig.add_trace(go.Scatter(x=filtered_data["日付"], y=filtered_data["除脂肪体重"], mode='lines+markers', name="除脂肪体重"))
 
-    fig, ax = plt.subplots()
-    ax.plot(date, weight, label="体重", marker="o", linestyle="-")
-    ax.plot(date, filtered_data["除脂肪体重"], label="除脂肪体重", marker="o", linestyle="-")
-    ax.legend(loc="upper left", bbox_to_anchor=(1.05, 1))
-    ax.tick_params(axis='x', labelrotation=45)
-    #ax.set_xticklabels(date.dt.strftime("%Y-%m-%d"), rotation=45)
-    ax.set_xlabel("日付")
-    ax.set_ylabel("kg")
+    fig.update_layout(
+        title=f"{selected_name}の体重推移",
+        xaxis_title="日付",
+        yaxis_title="kg",
+        hovermode='x unified'
+    )
 
-    st.pyplot(fig)
-    #else:
-        #filtered_data = data
+    st.plotly_chart(fig, use_container_width=True)
 
-    st.subheader(f"{selected_name}のデータ" if selected_name != "全員" else "全ユーザーのデータ")
-
+    st.subheader(f"{selected_name}のデータ")
     columns = ["日付", "名前", "体重", "体脂肪率", "除脂肪体重", "スクワットMAX(kg)", "ベンチプレスMAX(kg)", 
                "握力(左)", "握力(右)", "プルダウン", "Broad Jump(cm)", "Left Ice Skater Jump(cm)", 
                "Right Ice Skater Jump(cm)", "メディシン(バックスロー3kg)", "プライオ(三段跳び)", "チンニング", "ガチスタ"]
-    looked_data = filtered_data[columns]
-    st.dataframe(looked_data)
+    st.dataframe(filtered_data[columns])
 
 elif page == "全体表示":
     st.header("平均データ表示")
     option = st.sidebar.selectbox("データを選択", options=["全体", "1年", "2年", "3年", "4年", "R7卒", "投手", "野手"])
 
-    if option == "全体":
-        st.subheader("全体の平均値")
-        df = data.copy()
-        df["日付"] = pd.to_datetime(df["日付"], errors="coerce")
-        df["体重"] = pd.to_numeric(df["体重"], errors="coerce")
-        df["除脂肪体重"] = pd.to_numeric(df["除脂肪体重"], errors="coerce")
-        df_mean = df.groupby("日付")[["体重", "除脂肪体重"]].mean().reset_index()
-        df_mean = df_mean.sort_values(by="日付")
+    label_dict = {
+        "全体": meibo,
+        "1年": freshman,
+        "2年": sophomore,
+        "3年": junior,
+        "4年": senior,
+        "R7卒": m1,
+        "投手": pitcher,
+        "野手": batter
+    }
 
-        fig, ax = plt.subplots(figsize=(10, 6))
-        ax.plot(df_mean["日付"], df_mean["体重"], marker="o", linestyle="-", label="体重")
-        ax.plot(df_mean["日付"], df_mean["除脂肪体重"], marker="o", linestyle="-", label="除脂肪体重")
-        ax.tick_params(axis='x', labelrotation=45)
-        #ax.set_xticklabels(df_mean["日付"].dt.strftime("%Y-%m-%d"), rotation=45)
-        ax.legend(loc="upper left", bbox_to_anchor=(1.05, 1))
-        ax.set_xlabel("日付")
-        ax.set_ylabel("kg")
-        ax.set_title("平均値の推移")
+    selected_group = label_dict[option]
+    df = data[data["名前"].isin(selected_group["フルネーム"])]
+    df["日付"] = pd.to_datetime(df["日付"], errors="coerce")
+    df["体重"] = pd.to_numeric(df["体重"], errors="coerce")
+    df["除脂肪体重"] = pd.to_numeric(df["除脂肪体重"], errors="coerce")
+    df_mean = df.groupby("日付")[["体重", "除脂肪体重"]].mean().reset_index()
+    df_mean = df_mean.sort_values("日付")
 
-        st.pyplot(fig)
+    fig = go.Figure()
+    fig.add_trace(go.Scatter(x=df_mean["日付"], y=df_mean["体重"], mode='lines+markers', name="体重"))
+    fig.add_trace(go.Scatter(x=df_mean["日付"], y=df_mean["除脂肪体重"], mode='lines+markers', name="除脂肪体重"))
 
-    elif option == "1年":
-        st.subheader("1年生の平均値")
-        df = data[data["名前"].isin(freshman["フルネーム"])]
-        df["日付"] = pd.to_datetime(df["日付"], errors="coerce")
-        df["体重"] = pd.to_numeric(df["体重"], errors="coerce")
-        df["除脂肪体重"] = pd.to_numeric(df["除脂肪体重"], errors="coerce")
-        df_mean = df.groupby("日付")[["体重", "除脂肪体重"]].mean().reset_index()
-        df_mean = df_mean.sort_values(by="日付")
+    fig.update_layout(
+        title=f"{option}の平均値の推移",
+        xaxis_title="日付",
+        yaxis_title="kg",
+        hovermode='x unified'
+    )
 
-        fig, ax = plt.subplots(figsize=(10, 6))
-        ax.plot(df_mean["日付"], df_mean["体重"], marker="o", linestyle="-", label="体重")
-        ax.plot(df_mean["日付"], df_mean["除脂肪体重"], marker="o", linestyle="-", label="除脂肪体重")
-        ax.tick_params(axis='x', labelrotation=45)
-        #ax.set_xticklabels(df_mean["日付"].dt.strftime("%Y-%m-%d"), rotation=45)
-        ax.legend(loc="upper left", bbox_to_anchor=(1.05, 1))
-        ax.set_xlabel("日付")
-        ax.set_ylabel("kg")
-        ax.set_title("1年生の平均値の推移")
-
-        st.pyplot(fig)
-
-    elif option == "2年":
-        st.subheader("2年生の平均値")
-        df = data[data["名前"].isin(sophomore["フルネーム"])]
-        df["日付"] = pd.to_datetime(df["日付"], errors="coerce")
-        df["体重"] = pd.to_numeric(df["体重"], errors="coerce")
-        df["除脂肪体重"] = pd.to_numeric(df["除脂肪体重"], errors="coerce")
-        df_mean = df.groupby("日付")[["体重", "除脂肪体重"]].mean().reset_index()
-        df_mean = df_mean.sort_values(by="日付")
-
-        fig, ax = plt.subplots(figsize=(10, 6))
-        ax.plot(df_mean["日付"], df_mean["体重"], marker="o", linestyle="-", label="体重")
-        ax.plot(df_mean["日付"], df_mean["除脂肪体重"], marker="o", linestyle="-", label="除脂肪体重")
-        ax.tick_params(axis='x', labelrotation=45)
-        #ax.set_xticklabels(df_mean["日付"].dt.strftime("%Y-%m-%d"), rotation=45)
-        ax.legend(loc="upper left", bbox_to_anchor=(1.05, 1))
-        ax.set_xlabel("日付")
-        ax.set_ylabel("kg")
-        ax.set_title("2年生の平均値の推移")
-
-        st.pyplot(fig)
-
-    elif option == "3年":
-        st.subheader("3年生の平均値")
-        df = data[data["名前"].isin(junior["フルネーム"])]
-        df["日付"] = pd.to_datetime(df["日付"], errors="coerce")
-        df["体重"] = pd.to_numeric(df["体重"], errors="coerce")
-        df["除脂肪体重"] = pd.to_numeric(df["除脂肪体重"], errors="coerce")
-        df_mean = df.groupby("日付")[["体重", "除脂肪体重"]].mean().reset_index()
-        df_mean = df_mean.sort_values(by="日付")
-
-        fig, ax = plt.subplots(figsize=(10, 6))
-        ax.plot(df_mean["日付"], df_mean["体重"], marker="o", linestyle="-", label="体重")
-        ax.plot(df_mean["日付"], df_mean["除脂肪体重"], marker="o", linestyle="-", label="除脂肪体重")
-        ax.tick_params(axis='x', labelrotation=45)
-        #ax.set_xticklabels(df_mean["日付"].dt.strftime("%Y-%m-%d"), rotation=45)
-        ax.legend(loc="upper left", bbox_to_anchor=(1.05, 1))
-        ax.set_xlabel("日付")
-        ax.set_ylabel("kg")
-        ax.set_title("3年生の平均値の推移")
-
-        st.pyplot(fig)
-
-    elif option == "4年":
-        st.subheader("4年生の平均値")
-        df = data[data["名前"].isin(senior["フルネーム"])]
-        df["日付"] = pd.to_datetime(df["日付"], errors="coerce")
-        df["体重"] = pd.to_numeric(df["体重"], errors="coerce")
-        df["除脂肪体重"] = pd.to_numeric(df["除脂肪体重"], errors="coerce")
-        df_mean = df.groupby("日付")[["体重", "除脂肪体重"]].mean().reset_index()
-        df_mean = df_mean.sort_values(by="日付")
-
-        fig, ax = plt.subplots(figsize=(10, 6))
-        ax.plot(df_mean["日付"], df_mean["体重"], marker="o", linestyle="-", label="体重")
-        ax.plot(df_mean["日付"], df_mean["除脂肪体重"], marker="o", linestyle="-", label="除脂肪体重")
-        ax.tick_params(axis='x', labelrotation=45)
-        #ax.set_xticklabels(df_mean["日付"].dt.strftime("%Y-%m-%d"), rotation=45)
-        ax.legend(loc="upper left", bbox_to_anchor=(1.05, 1))
-        ax.set_xlabel("日付")
-        ax.set_ylabel("kg")
-        ax.set_title("4年生の平均値の推移")
-
-        st.pyplot(fig)
-
-    elif option == "R7卒":
-        st.subheader("R7卒の平均値")
-        df = data[data["名前"].isin(m1["フルネーム"])]
-        df["日付"] = pd.to_datetime(df["日付"], errors="coerce")
-        df["体重"] = pd.to_numeric(df["体重"], errors="coerce")
-        df["除脂肪体重"] = pd.to_numeric(df["除脂肪体重"], errors="coerce")
-        df_mean = df.groupby("日付")[["体重", "除脂肪体重"]].mean().reset_index()
-        df_mean = df_mean.sort_values(by="日付")
-
-        fig, ax = plt.subplots(figsize=(10, 6))
-        ax.plot(df_mean["日付"], df_mean["体重"], marker="o", linestyle="-", label="体重")
-        ax.plot(df_mean["日付"], df_mean["除脂肪体重"], marker="o", linestyle="-", label="除脂肪体重")
-        ax.tick_params(axis='x', labelrotation=45)
-        #ax.set_xticklabels(df_mean["日付"].dt.strftime("%Y-%m-%d"), rotation=45)
-        ax.legend(loc="upper left", bbox_to_anchor=(1.05, 1))
-        ax.set_xlabel("日付")
-        ax.set_ylabel("kg")
-        ax.set_title("R7卒の平均値の推移")
-
-        st.pyplot(fig)
-
-    elif option == "投手":
-        st.subheader("投手の平均値")
-        df = data[data["名前"].isin(pitcher["フルネーム"])]
-        df["日付"] = pd.to_datetime(df["日付"], errors="coerce")
-        df["体重"] = pd.to_numeric(df["体重"], errors="coerce")
-        df["除脂肪体重"] = pd.to_numeric(df["除脂肪体重"], errors="coerce")
-        df_mean = df.groupby("日付")[["体重", "除脂肪体重"]].mean().reset_index()
-        df_mean = df_mean.sort_values(by="日付")
-
-        fig, ax = plt.subplots(figsize=(10, 6))
-        ax.plot(df_mean["日付"], df_mean["体重"], marker="o", linestyle="-", label="体重")
-        ax.plot(df_mean["日付"], df_mean["除脂肪体重"], marker="o", linestyle="-", label="除脂肪体重")
-        ax.tick_params(axis='x', labelrotation=45)
-        #ax.set_xticklabels(df_mean["日付"].dt.strftime("%Y-%m-%d"), rotation=45)
-        ax.legend(loc="upper left", bbox_to_anchor=(1.05, 1))
-        ax.set_xlabel("日付")
-        ax.set_ylabel("kg")
-        ax.set_title("投手の平均値の推移")
-
-        st.pyplot(fig)
-
-    elif option == "野手":
-        st.subheader("野手の平均値")
-        df = data[data["名前"].isin(batter["フルネーム"])]
-        df["日付"] = pd.to_datetime(df["日付"], errors="coerce")
-        df["体重"] = pd.to_numeric(df["体重"], errors="coerce")
-        df["除脂肪体重"] = pd.to_numeric(df["除脂肪体重"], errors="coerce")
-        df_mean = df.groupby("日付")[["体重", "除脂肪体重"]].mean().reset_index()
-        df_mean = df_mean.sort_values(by="日付")
-
-        fig, ax = plt.subplots(figsize=(10, 6))
-        ax.plot(df_mean["日付"], df_mean["体重"], marker="o", linestyle="-", label="体重")
-        ax.plot(df_mean["日付"], df_mean["除脂肪体重"], marker="o", linestyle="-", label="除脂肪体重")
-        ax.tick_params(axis='x', labelrotation=45)
-        #ax.set_xticklabels(df_mean["日付"].dt.strftime("%Y-%m-%d"), rotation=45)
-        ax.legend(loc="upper left", bbox_to_anchor=(1.05, 1))
-        ax.set_xlabel("日付")
-        ax.set_ylabel("kg")
-        ax.set_title("野手の平均値の推移")
-
-        st.pyplot(fig)
+    st.plotly_chart(fig, use_container_width=True)
