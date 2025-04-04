@@ -8,6 +8,7 @@ import plotly.graph_objects as go
 # ファイルパスの指定
 folder_path = "トレデータ/"
 csv_files = glob.glob(os.path.join(folder_path, "*.csv"))
+st.write("CSVファイル一覧:", csv_files)
 
 # 複数のcsvを結合
 df_list = [pd.read_csv(f) for f in csv_files]
