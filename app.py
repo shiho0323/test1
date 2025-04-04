@@ -6,7 +6,7 @@ import os
 import plotly.graph_objects as go
 
 # ファイルパスの指定
-folder_path = "トレデータ/"
+folder_path = "data/"
 csv_files = glob.glob(os.path.join(folder_path, "*.csv"))
 st.write("CSVファイル一覧:", csv_files)
 
