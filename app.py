@@ -34,8 +34,20 @@ page = st.sidebar.radio("表示モードを選択", ("個人表示", "全体表�
 
 if page == "個人表示":
     st.header("個人別データ表示")
-    names = list(meibo["フルネーム"].unique())
+    # 学年ごとの並び順を指定（4年→3年→2年→1年→R7卒）
+    grade_order = [2022, 2023, 2024, 2025, 2021]
+
+    # 学年ごとに処理して、投手→野手の順に並べる
+    sorted_meibo = pd.DataFrame()
+    for year in grade_order:
+        year_group = meibo[meibo["入学年"] == year]
+        pitchers = year_group[year_group["位置"] == "投手"].sort_values("フルネーム")
+        batters = year_group[year_group["位置"] != "投手"].sort_values("フルネーム")
+        sorted_meibo = pd.concat([sorted_meibo, pitchers, batters])
+
+    names = sorted_meibo["フルネーム"].tolist()
     selected_name = st.sidebar.selectbox("名前を選択", options=names)
+
 
     filtered_data = data[data["名前"] == selected_name].copy()
     filtered_data["日付"] = pd.to_datetime(filtered_data["日付"], errors="coerce")
