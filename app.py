@@ -43,7 +43,7 @@ if page == "個人表示":
         year_group = meibo[meibo["入学年"] == year]
         pitchers = year_group[year_group["位置"] == "投手"].sort_values("フルネーム")
         batters = year_group[year_group["位置"] != "投手"].sort_values("フルネーム")
-        sorted_meibo = pd.concat([sorted_meibo, pitchers, batters])
+        sorted_meibo = pd.concat([sorted_meibo, pitchers, batters], ignore_index=True)
 
     names = sorted_meibo["フルネーム"].tolist()
     selected_name = st.sidebar.selectbox("名前を選択", options=names)
