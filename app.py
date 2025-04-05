@@ -98,3 +98,38 @@ elif page == "全体表示":
     )
 
     st.plotly_chart(fig, use_container_width=True)
+
+    if option in ["1年生", "2年生", "3年生", "4年生", "R7卒生"]:
+        pos_pitcher = selected_group[selected_group["位置"] == "投手"]
+        pos_batter = selected_group[selected_group["位置"] != "投手"]
+
+        for df_sub, pos_label in zip(
+            [data[data["名前"].isin(pos_pitcher["フルネーム"])],
+             data[data["名前"].isin(pos_batter["フルネーム"])]],
+            ["投手", "野手"]
+        ):
+            df_sub["日付"] = pd.to_datetime(df_sub["日付"], errors="coerce")
+            df_sub["体重"] = pd.to_numeric(df_sub["体重"], errors="coerce")
+            df_sub["除脂肪体重"] = pd.to_numeric(df_sub["除脂肪体重"], errors="coerce")
+
+            # 人数・測定回数を表示
+            num_players = df_sub["名前"].nunique()
+            num_records = len(df_sub)
+            st.markdown(f"**{option}（{pos_label}）**：{num_players}人、{num_records}件の測定データ")
+
+            df_mean_sub = df_sub.groupby("日付")[["体重", "除脂肪体重"]].mean().reset_index()
+            df_mean_sub = df_mean_sub.sort_values("日付")
+
+            fig_sub = go.Figure()
+            fig_sub.add_trace(go.Scatter(x=df_mean_sub["日付"], y=df_mean_sub["体重"], mode='lines+markers', name="体重"))
+            fig_sub.add_trace(go.Scatter(x=df_mean_sub["日付"], y=df_mean_sub["除脂肪体重"], mode='lines+markers', name="除脂肪体重"))
+
+            fig_sub.update_layout(
+                title=f"{option}（{pos_label}）の平均値の推移",
+                xaxis_title="日付",
+                yaxis_title="kg",
+                hovermode='x unified'
+            )
+
+            st.plotly_chart(fig_sub, use_container_width=True)
+
