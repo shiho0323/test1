@@ -30,7 +30,7 @@ batter = meibo.query("位置 != '投手'")
 
 st.title("フィジカルデータ")
 
-page = st.sidebar.radio("表示モードを選択", ("個人表示", "全体表示"))
+page = st.sidebar.radio("表示モードを選択", ("個人表示", "全体表示"), index = 1)
 
 if page == "個人表示":
     st.header("個人別データ表示")
