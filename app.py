@@ -5,22 +5,24 @@ import glob
 import os
 import plotly.graph_objects as go
 
-# ファイルパスの指定
+# 測定会データの読み込み
 folder_path = "data/"
 csv_files = glob.glob(os.path.join(folder_path, "*.csv"))
-
-# 複数のcsvを結合
 df_list = [pd.read_csv(f) for f in csv_files]
 data = pd.concat(df_list, ignore_index=True)
 data["日付"] = pd.to_datetime(data["日付"], errors='coerce')
 data["除脂肪体重"] = pd.to_numeric(data["除脂肪体重"], errors="coerce")
 data["除脂肪体重"] = data["除脂肪体重"].replace(0, np.nan)
 
+# BLASTデータの読み込み
 folder_path2 = "BLAST/"
 csv_files2 = glob.glob(os.path.join(folder_path2, "*.csv"))
 df_list2 = [pd.read_csv(f) for f in csv_files2]
 BLAST = pd.concat(df_list2, ignore_index=True)
+BLAST['Date'] = pd.to_datetime(BLAST['Date'])
+BLAST = BLAST.query('mode == "ドラ直"')
 
+# トラックマン名簿の読み込み
 meibo = pd.read_csv("24trackman.csv")
 meibo = meibo.query("PitcherTeam == 'TOK'")
 
@@ -35,6 +37,7 @@ batter = meibo.query("位置 != '投手'")
 
 st.title("フィジカル＆練習データ")
 
+# デフォルトで全体表示を選択
 page = st.sidebar.radio("表示モードを選択", ("個人表示", "全体表示"), index = 1)
 
 if page == "個人表示":
@@ -84,12 +87,8 @@ if page == "個人表示":
         st.dataframe(filtered_data[columns])
     
     elif page == "BLAST推移":
-        BLAST['Date'] = pd.to_datetime(BLAST['Date'])
-        BLAST = BLAST.query('mode == "ドラ直"')
 
         romaji_name = meibo.loc[meibo["フルネーム"] == selected_name, "romaji"].values[0]
-
-
         player_data = BLAST[BLAST["name"] == romaji_name].copy()
 
         if player_data.empty:
@@ -122,6 +121,7 @@ if page == "個人表示":
             name="スイング時間 (秒)",
             yaxis="y2"
         ))
+
         # レイアウト：2軸設定
         fig.update_layout(
             title=f"{selected_name} のドラ直月別平均（バットスピード＆スイング時間）",
@@ -137,7 +137,6 @@ if page == "個人表示":
             width=800,
             height=400
         )
-
 
         fig.update_layout(
         xaxis=dict(
@@ -229,4 +228,3 @@ elif page == "全体表示":
             )
 
             st.plotly_chart(fig_sub, use_container_width=True)
-
