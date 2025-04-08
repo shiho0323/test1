@@ -19,7 +19,7 @@ data["除脂肪体重"] = data["除脂肪体重"].replace(0, np.nan)
 folder_path2 = "BLAST/"
 csv_files2 = glob.glob(os.path.join(folder_path2, "*.csv"))
 df_list2 = [pd.read_csv(f) for f in csv_files2]
-BLAST = pd.concat(df_list, ignore_index=True)
+BLAST = pd.concat(df_list2, ignore_index=True)
 
 meibo = pd.read_csv("24trackman.csv")
 meibo = meibo.query("PitcherTeam == 'TOK'")
