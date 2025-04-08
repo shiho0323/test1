@@ -53,7 +53,7 @@ if page == "個人表示":
     names = sorted_meibo["フルネーム"].tolist()
     selected_name = st.sidebar.selectbox("名前を選択", options=names)
 
-    page = st.sidebar.radio("表示モードを選択", ("測定会データ", "BLAST推移"), index = 1)
+    page = st.sidebar.radio("表示項目を選択", ("測定会データ", "BLAST推移"), index = 1)
 
     if page == "測定会データ":
         st.subheader(f"{selected_name}の測定会データ")
