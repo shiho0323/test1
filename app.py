@@ -87,7 +87,10 @@ if page == "個人表示":
         BLAST['Date'] = pd.to_datetime(BLAST['Date'])
         BLAST = BLAST.query('mode == "ドラ直"')
 
-        player_data = BLAST[BLAST["name"] == selected_name].copy()
+        romaji_name = meibo.loc[meibo["フルネーム"] == selected_name, "romaji"].values
+
+
+        player_data = BLAST[BLAST["name"] == romaji_name].copy()
 
         if player_data.empty:
             st.write("データがありません。")  # データが1件もなかったらスキップ
