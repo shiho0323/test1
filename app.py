@@ -16,6 +16,11 @@ data["日付"] = pd.to_datetime(data["日付"], errors='coerce')
 data["除脂肪体重"] = pd.to_numeric(data["除脂肪体重"], errors="coerce")
 data["除脂肪体重"] = data["除脂肪体重"].replace(0, np.nan)
 
+folder_path2 = "BLAST/"
+csv_files2 = glob.glob(os.path.join(folder_path2, "*.csv"))
+df_list2 = [pd.read_csv(f) for f in csv_files]
+BLAST = pd.concat(df_list, ignore_index=True)
+
 meibo = pd.read_csv("24trackman.csv")
 meibo = meibo.query("PitcherTeam == 'TOK'")
 
@@ -28,7 +33,7 @@ freshman = meibo.query("入学年 == 2025")
 pitcher = meibo.query("位置 == '投手'")
 batter = meibo.query("位置 != '投手'")
 
-st.title("フィジカルデータ")
+st.title("フィジカル＆練習データ")
 
 page = st.sidebar.radio("表示モードを選択", ("個人表示", "全体表示"), index = 1)
 
@@ -48,32 +53,109 @@ if page == "個人表示":
     names = sorted_meibo["フルネーム"].tolist()
     selected_name = st.sidebar.selectbox("名前を選択", options=names)
 
+    page = st.sidebar.radio("表示モードを選択", ("測定会データ", "BLAST推移"), index = 1)
 
-    filtered_data = data[data["名前"] == selected_name].copy()
-    filtered_data["日付"] = pd.to_datetime(filtered_data["日付"], errors="coerce")
-    filtered_data["体重"] = pd.to_numeric(filtered_data["体重"], errors="coerce")
-    filtered_data["除脂肪体重"] = pd.to_numeric(filtered_data["除脂肪体重"], errors="coerce")
-    filtered_data = filtered_data.dropna(subset=["日付", "体重"])
-    filtered_data = filtered_data.sort_values("日付")
+    if page == "測定会データ":
+        st.subheader(f"{selected_name}の測定会データ")
+        filtered_data = data[data["名前"] == selected_name].copy()
+        filtered_data["日付"] = pd.to_datetime(filtered_data["日付"], errors="coerce")
+        filtered_data["体重"] = pd.to_numeric(filtered_data["体重"], errors="coerce")
+        filtered_data["除脂肪体重"] = pd.to_numeric(filtered_data["除脂肪体重"], errors="coerce")
+        filtered_data = filtered_data.dropna(subset=["日付", "体重"])
+        filtered_data = filtered_data.sort_values("日付")
 
-    fig = go.Figure()
-    fig.add_trace(go.Scatter(x=filtered_data["日付"], y=filtered_data["体重"], mode='lines+markers', name="体重"))
-    fig.add_trace(go.Scatter(x=filtered_data["日付"], y=filtered_data["除脂肪体重"], mode='lines+markers', name="除脂肪体重"))
+        fig = go.Figure()
+        fig.add_trace(go.Scatter(x=filtered_data["日付"], y=filtered_data["体重"], mode='lines+markers', name="体重"))
+        fig.add_trace(go.Scatter(x=filtered_data["日付"], y=filtered_data["除脂肪体重"], mode='lines+markers', name="除脂肪体重"))
 
-    fig.update_layout(
-        title=f"{selected_name}の体重推移",
-        xaxis_title="日付",
-        yaxis_title="kg",
-        hovermode='x unified'
-    )
+        fig.update_layout(
+            title=f"{selected_name}の測定会データ",
+            xaxis_title="日付",
+            yaxis_title="kg",
+            hovermode='x unified'
+        )
 
-    st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, use_container_width=True)
 
-    st.subheader(f"{selected_name}のデータ")
-    columns = ["日付", "名前", "体重", "体脂肪率", "除脂肪体重", "スクワットMAX(kg)", "ベンチプレスMAX(kg)", 
+        st.subheader(f"{selected_name}のデータ")
+        columns = ["日付", "名前", "体重", "体脂肪率", "除脂肪体重", "スクワットMAX(kg)", "ベンチプレスMAX(kg)", 
                "握力(左)", "握力(右)", "プルダウン", "Broad Jump(cm)", "Left Ice Skater Jump(cm)", 
                "Right Ice Skater Jump(cm)", "メディシン(バックスロー3kg)", "プライオ(三段跳び)", "チンニング", "ガチスタ"]
-    st.dataframe(filtered_data[columns])
+        st.dataframe(filtered_data[columns])
+    
+    elif page == "BLAST推移":
+        BLAST['Date'] = pd.to_datetime(BLAST['Date'])
+        BLAST = BLAST.query('mode == "ドラ直"')
+
+        player_data = BLAST[BLAST["name"] == selected_name].copy()
+
+        if player_data.empty:
+            st.write("データがありません。")  # データが1件もなかったらスキップ
+
+        player_data['Month'] = player_data['Date'].dt.to_period('M')
+        monthly_avg = player_data.groupby('Month')[["バットスピード (km/h)", "スイング時間 (秒)"]].mean().reset_index()
+        monthly_avg['Month'] = monthly_avg['Month'].dt.to_timestamp()  # plotly用にdatetime型に戻す
+
+        #if monthly_avg.empty:
+            #continue  # 月別平均が空（データがまとまらなかった）ときもスキップ
+
+        # Plotlyで描画
+        fig = go.Figure()
+
+        # バットスピード：左軸
+        fig.add_trace(go.Scatter(
+            x=monthly_avg["Month"],
+            y=monthly_avg["バットスピード (km/h)"],
+            mode='lines+markers',
+            name="バットスピード (km/h)",
+            yaxis="y1"
+        ))
+
+        # スイング時間：右軸
+        fig.add_trace(go.Scatter(
+            x=monthly_avg["Month"],
+            y=monthly_avg["スイング時間 (秒)"],
+            mode='lines+markers',
+            name="スイング時間 (秒)",
+            yaxis="y2"
+        ))
+        # レイアウト：2軸設定
+        fig.update_layout(
+            title=f"{p} の月別平均（バットスピード＆スイング時間）",
+            xaxis=dict(title="月"),
+            yaxis=dict(title="バットスピード (km/h)", side="left"),
+             yaxis2=dict(
+                title="スイング時間 (秒)",
+                overlaying="y",
+                side="right",
+                showgrid=False
+               ),
+            legend=dict(x=0.01, y=0.99),
+            width=800,
+            height=400
+        )
+
+
+        fig.update_layout(
+        xaxis=dict(
+            tickformat="%Y-%m",
+            tickvals=monthly_avg["Month"]  # 月ごとのdatetimeのリストを渡す
+        )
+        )
+
+        fig.update_layout(
+        legend=dict(
+            x=1.2,  # x=1より右に出る（1がグラフの右端）
+            y=1,     # y=1は上端（1がグラフの上）
+            xanchor="left",
+            yanchor="top",
+            bordercolor="lightgray",
+            borderwidth=1
+        )
+        )
+
+        st.plotly_chart(fig, use_container_width=True)
+
 
 elif page == "全体表示":
     st.header("平均データ表示")
