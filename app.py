@@ -124,7 +124,7 @@ if page == "個人表示":
         ))
         # レイアウト：2軸設定
         fig.update_layout(
-            title=f"{selected_name} の月別平均（バットスピード＆スイング時間）",
+            title=f"{selected_name} のドラ直月別平均（バットスピード＆スイング時間）",
             xaxis=dict(title="月"),
             yaxis=dict(title="バットスピード (km/h)", side="left"),
              yaxis2=dict(
