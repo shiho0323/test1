@@ -18,7 +18,7 @@ data["除脂肪体重"] = data["除脂肪体重"].replace(0, np.nan)
 
 folder_path2 = "BLAST/"
 csv_files2 = glob.glob(os.path.join(folder_path2, "*.csv"))
-df_list2 = [pd.read_csv(f) for f in csv_files]
+df_list2 = [pd.read_csv(f) for f in csv_files2]
 BLAST = pd.concat(df_list, ignore_index=True)
 
 meibo = pd.read_csv("24trackman.csv")
@@ -121,7 +121,7 @@ if page == "個人表示":
         ))
         # レイアウト：2軸設定
         fig.update_layout(
-            title=f"{p} の月別平均（バットスピード＆スイング時間）",
+            title=f"{selected_name} の月別平均（バットスピード＆スイング時間）",
             xaxis=dict(title="月"),
             yaxis=dict(title="バットスピード (km/h)", side="left"),
              yaxis2=dict(
