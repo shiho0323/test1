@@ -87,7 +87,7 @@ if page == "個人表示":
         BLAST['Date'] = pd.to_datetime(BLAST['Date'])
         BLAST = BLAST.query('mode == "ドラ直"')
 
-        romaji_name = meibo.loc[meibo["フルネーム"] == selected_name, "romaji"].values
+        romaji_name = meibo.loc[meibo["フルネーム"] == selected_name, "romaji"].values[0]
 
 
         player_data = BLAST[BLAST["name"] == romaji_name].copy()
