@@ -23,7 +23,7 @@ BLAST['Date'] = pd.to_datetime(BLAST['Date'])
 BLAST = BLAST.query('mode == "ドラ直"')
 
 # トラックマン名簿の読み込み
-meibo = pd.read_csv("24trackman.csv")
+meibo = pd.read_csv("25trackman.csv")
 meibo = meibo.query("PitcherTeam == 'TOK'")
 
 # 分類
